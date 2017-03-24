@@ -17,6 +17,8 @@
 
 import math
 import threading
+
+from time import time
 from gnuradio import gr
 
 LENGTH = 56
@@ -56,6 +58,7 @@ class decoder_thread(threading.Thread):
 
 
   def decode(self,decoded_msg):
+    t = time()
     df = bin2dec(decoded_msg[:5])
     # Sanity check DF value
     if df not in [0, 4, 5, 11, 16, 17, 19, 20, 21, 22, 24]:
@@ -104,8 +107,8 @@ class decoder_thread(threading.Thread):
           heading = speed_heading[1]
 
       if "csv" == self.output_type:
-        adsb_str = "%06X,%s,%s,%s,%s,%s,%s,%s,%s\n" % \
-       (icao,
+        adsb_str = "%f,%06X,%s,%s,%s,%s,%s,%s,%s,%s\n" % \
+       (t,icao,
         callsign if callsign else "",
         int(speed) if speed != -1 else "",
         int(heading) if heading != -1 else "",
@@ -116,8 +119,8 @@ class decoder_thread(threading.Thread):
         tc if tc != -1 else "")
 
       if "json" == self.output_type:
-        adsb_str = '{"icao": "%06X", "callsign": "%s", "speed": "%s", "heading": "%s", "position": "%s", "eo": "%s", "downlink_format": "%s", "message_subtype": "%s", "type_code": "%s", "parity": "%s"}\n' % \
-       (icao,
+        adsb_str = '{"time": "%f", "icao": "%06X", "callsign": "%s", "speed": "%s", "heading": "%s", "position": "%s", "eo": "%s", "downlink_format": "%s", "message_subtype": "%s", "type_code": "%s", "parity": "%s"}\n' % \
+       (t,icao,
         callsign if callsign else "",
         int(speed) if speed != -1 else "",
         int(heading) if heading != -1 else "",
